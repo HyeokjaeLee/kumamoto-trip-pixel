@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>구마모토 골프 여행 2026 — 픽셀 여정</title>
+<style>
+  :root{
+    --bg:#1a1c2c; --ink:#f4f4f4; --gold:#ffd700;
+    --green:#38b764; --sky:#7df9ff; --orange:#ff9f1c; --red:#ff5a5f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Apple SD Gothic Neo','Malgun Gothic',monospace,sans-serif;overflow-x:hidden}
+  header{text-align:center;padding:56px 20px 28px;background:linear-gradient(180deg,#29366f,#1a1c2c);position:relative;overflow:hidden}
+  h1{font-size:clamp(20px,4.5vw,34px);color:var(--gold);text-shadow:3px 3px 0 #000;letter-spacing:1px}
+  .sub{margin-top:12px;font-size:clamp(12px,2vw,16px);color:var(--sky)}
+  .budget{display:inline-block;margin-top:18px;padding:10px 22px;border:3px solid var(--gold);background:#000;color:var(--gold);font-size:clamp(11px,2vw,15px);box-shadow:4px 4px 0 rgba(0,0,0,.5)}
+  .star{position:absolute;width:2px;height:2px;background:#fff;animation:tw 2s infinite}
+  @keyframes tw{0%,100%{opacity:.2}50%{opacity:1}}
+  .map-wrap{position:relative;width:100%;max-width:900px;margin:0 auto;padding:16px}
+  .route-svg{width:100%;display:block;background:linear-gradient(180deg,#0f1220,#1a1c2c);border:3px solid #333}
+  .route-line{fill:none;stroke:#444a6b;stroke-width:4;stroke-dasharray:8 6}
+  .route-progress{fill:none;stroke:var(--gold);stroke-width:5;stroke-linecap:round;filter:drop-shadow(0 0 4px var(--gold))}
+  .traveler{position:absolute;width:36px;height:36px;z-index:10;pointer-events:none;transform:translate(-50%,-100%)}
+  .traveler .body{font-size:28px;filter:drop-shadow(2px 2px 0 #000)}
+  .traveler.on-move .body{animation:hop .35s infinite alternate}
+  @keyframes hop{from{transform:translateY(0)}to{transform:translateY(-7px)}}
+  .traveler .bubble{position:absolute;bottom:105%;left:50%;transform:translateX(-50%);background:#000;border:2px solid var(--gold);color:var(--gold);padding:3px 9px;white-space:nowrap;font-size:11px;display:none}
+  .traveler.on-move .bubble{display:block}
+  .stop{position:absolute;transform:translate(-50%,-50%);text-align:center;z-index:5;cursor:pointer;user-select:none}
+  .stop .icon{font-size:26px;display:block;margin:0 auto;filter:grayscale(1) brightness(.55);transition:filter .3s}
+  .stop.done .icon{filter:none;animation:pop .4s}
+  .stop.now .icon{filter:none;animation:bnc .6s infinite alternate}
+  .stop .label{font-size:10px;margin-top:3px;background:rgba(0,0,0,.75);padding:2px 7px;border:1px solid #444;display:inline-block;white-space:nowrap}
+  .stop.now .label{border-color:var(--gold);color:var(--gold)}
+  .stop.done .label{border-color:var(--green);color:var(--green)}
+  @keyframes pop{0%{transform:scale(.4)}70%{transform:scale(1.35)}100%{transform:scale(1)}}
+  @keyframes bnc{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+  .hud{max-width:900px;margin:14px auto 0;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border:3px solid #444;background:#0d0e1a}
+  .hud .day{font-size:clamp(11px,2vw,15px);color:var(--sky)}
+  .hud .money{font-size:clamp(11px,2vw,15px);color:var(--gold)}
+  .progressbar{flex:1;min-width:140px;height:14px;border:2px solid #555;background:#000}
+  .progressbar .fill{height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--sky));transition:width 1.4s}
+  .ctrl{text-align:center;margin:26px 0 8px}
+  button{font-family:inherit;font-size:15px;padding:12px 36px;cursor:pointer;background:var(--orange);color:#000;border:none;font-weight:bold;box-shadow:0 5px 0 #b35c00,0 8px 12px rgba(0,0,0,.4);transition:.1s;letter-spacing:1px}
+  button:active{transform:translateY(4px);box-shadow:0 1px 0 #b35c00}
+  button.done{background:var(--green);box-shadow:0 5px 0 #1d7a3e}
+  .days{max-width:900px;margin:30px auto 10px;padding:0 20px;display:grid;gap:16px}
+  .day-card{border:3px solid #3a3f66;background:#12142a;padding:18px;opacity:.35;transition:.5s;position:relative}
+  .day-card.active{opacity:1;border-color:var(--gold);box-shadow:0 0 18px rgba(255,215,0,.22)}
+  .day-card h3{color:var(--gold);font-size:clamp(13px,2.4vw,17px);margin-bottom:10px}
+  .day-card .badge{position:absolute;top:-12px;right:12px;background:var(--red);color:#fff;font-size:10px;padding:3px 9px;border:2px solid #000}
+  .day-card ul{list-style:none;font-size:clamp(11px,1.8vw,14px);line-height:1.95}
+  .day-card li::before{content:'▸ ';color:var(--sky)}
+  .cost-row{margin-top:10px;padding-top:8px;border-top:1px dashed #444;font-size:12px;color:var(--green)}
+  .sum{max-width:900px;margin:24px auto;padding:0 20px}
+  .sum-card{border:3px solid var(--gold);background:#141735;padding:18px;font-size:clamp(11px,1.9vw,14px);line-height:2}
+  .sum-card b{color:var(--gold)}
+  footer{text-align:center;padding:28px 16px 46px;font-size:11px;color:#777;line-height:1.8}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;z-index:50;align-items:center;justify-content:center;padding:20px}
+  .modal.open{display:flex}
+  .modal .box{background:#1a1c2c;border:3px solid var(--gold);max-width:460px;width:100%;padding:22px;font-size:13px;line-height:2;max-height:80vh;overflow:auto}
+  .modal h3{color:var(--gold);margin-bottom:8px}
+  .modal .close{margin-top:12px;background:var(--red);box-shadow:0 4px 0 #a02c30;padding:8px 20px;font-size:13px}
+  .confetti{position:fixed;top:-12px;width:8px;height:8px;z-index:99;pointer-events:none;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(108vh) rotate(720deg)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div id="stars"></div>
+  <h1>🗺 구마모토 골프 여행 4박 5일</h1>
+  <div class="sub">2026.10.20(화) ~ 10.24(토) · 2인 · 티웨이 인천↔구마모토 직항</div>
+  <div class="budget">💰 2인 총예산 1,569,209원 (1인 약 784,600원)</div>
+</header>
+
+<div class="hud">
+  <span class="day" id="hudDay">DAY 1 — 출발 대기</span>
+  <div class="progressbar"><div class="fill" id="hudFill"></div></div>
+  <span class="money" id="hudMoney">누적 689,280원 (항공)</span>
+</div>
+
+<div class="map-wrap" id="mapWrap">
+  <svg class="route-svg" id="routeSvg" viewBox="0 0 900 300" preserveAspectRatio="xMidYMid meet">
+    <path class="route-line" id="routeBase" d=""/>
+    <path class="route-progress" id="routeProg" d=""/>
+  </svg>
+</div>
+
+<div class="ctrl"><button id="startBtn">▶ 여정 시작</button></div>
+
+<section class="days" id="days"></section>
+
+<section class="sum">
+  <div class="sum-card">
+    <b>📦 2인 총예산 내역</b><br>
+    항공(티웨이 직항) 689,280 + 호텔(AMANEK 3박) 227,671 + 골프 3R 266,587 + 렌터카 4일 373,989 + 유료도로 11,682<br>
+    = <b>1,569,209원</b> (식비 별도 · 국제운전면허 필수 · 호텔 주차 유료 약 1,000~1,500엔/박)
+  </div>
+</section>
+
+<footer>
+  티웨이 TW287/288 · HOTEL AMANEK 구마모토(평점 9.1) · 토요타 렌탈 W1<br>
+  골프 3R: 기쿠치 CC → 구마모토 마스키 CC → 시라누이 CC · 유료도로는 시라누이 왕복만(ETC 670엔×2)
+</footer>
+
+<div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
+
+<script>
+/* ============ DATA (PDF 원문 기반) ============ */
+const STOPS = [
+  {x:60,  y:80,  icon:'🛫', label:'인천공항',      day:1, veh:'plane',
+   detail:'<b>DAY 1 · 10/20(화)</b><br>티웨이 TW287 · 07:55 인천 → 09:25 구마모토<br>직항 1h30m · 무료 위탁수하물(골프백 가능)<br>2인 항공료 689,280원 (네이버항공권 최저)'},
+  {x:220, y:190, icon:'✈️', label:'구마모토 공항', day:1, veh:'car',
+   detail:'09:25 도착 → 렌터카 인수 (18:30 전)<br>토요타 렌탈 W1(시엔타급) 4일 = 373,989원<br>공항 터미널 도보권 · 최저가'},
+  {x:390, y:90,  icon:'🏨', label:'AMANEK 호텔',  day:1, veh:'car',
+   detail:'시내 이동 19km/19분 → 체크인<br>HOTEL AMANEK 구마모토 · 3박 227,671원<br>평점 9.1 · 아고다 쿠폰 적용 · 잔여 4룸(품절 주의)<br>이후 구마모토성·수전소 관광 [골프 없음]'},
+  {x:555, y:210, icon:'⛳', label:'기쿠치 CC',    day:2, veh:'car',
+   detail:'<b>DAY 2 · 10/21(수) 골프 1R</b><br>기쿠치 CC(아코디아) · 국도 30km/35분 무료<br>2인 78,285원 (2인조 추가금 없음)<br>귀로 기쿠치 온천'},
+  {x:690, y:80,  icon:'⛳', label:'마스키 CC',    day:3, veh:'car',
+   detail:'<b>DAY 3 · 10/22(목) 골프 2R</b><br>구마모토 마스키 CC · 시내에서 9.4km/10분<br>2인 101,125원 (동일요금 추정, 예약 시 확인)<br>저녁 신시가이'},
+  {x:810, y:200, icon:'⛳', label:'시라누이 CC',  day:4, veh:'car',
+   detail:'<b>DAY 4 · 10/23(금) 골프 3R</b><br>시라누이 CC · 큐슈고속도로 27.5km/27분<br>ETC 670엔(=5,841원) · 2인 87,177원<br>플레이 후 공항 방면 이동'},
+  {x:880, y:70,  icon:'🛬', label:'귀국',         day:5, veh:'plane',
+   detail:'<b>DAY 5 · 10/24(토)</b><br>시내 관광 → 렌터카 공항 반납(플라이트 1시간 전)<br>티웨이 TW288 · 10:25 구마모토 → 12:00 인천<br>🎉 왕복 유료도로 합계 11,682원'},
+];
+const CUM = [689280, 689280+373989, 689280+373989+227671, 689280+373989+227671+78285, 689280+373989+227671+78285+101125, 689280+373989+227671+78285+101125+87177, 1569209];
+const DAY_CARDS = [
+  {t:'DAY 2 · 10/21(수) — 기쿠치 CC', badge:'골프 1R', cost:78285,
+   items:['골프장: 기쿠치 CC (아코디아)','이동: 공항 방면 국도 30km/35분, 유료도로 없음','2인 플레이: 78,285원 (2인조 추가금 없음 명시)','귀로: 기쿠치 온천']},
+  {t:'DAY 3 · 10/22(목) — 마스키 CC', badge:'골프 2R', cost:101125,
+   items:['골프장: 구마모토 마스키 CC','이동: 시내에서 9.4km/10분 (가장 가까움)','2인 플레이: 101,125원 (동일요금 추정)','저녁: 신시가이']},
+  {t:'DAY 4 · 10/23(금) — 시라누이 CC', badge:'골프 3R', cost:87177,
+   items:['골프장: 시라누이 CC','이동: 큐슈고속도로 27.5km/27분, ETC 670엔','2인 플레이: 87,177원 (동일요금 추정)','플레이 후 공항 방면 이동']},
+  {t:'DAY 5 · 10/24(토) — 귀국', badge:null, cost:0,
+   items:['시내 관광','렌터카 공항 반납 (플라이트 1시간 전 권장)','티웨이 TW288 10:25 → 12:00 인천','참고: 국제운전면허 필수, 호텔 주차 유료 별도']},
+];
+
+/* ============ BUILD ============ */
+const wrap = document.getElementById('mapWrap');
+const svg  = document.getElementById('routeSvg');
+const VW = 900, VH = 300;
+
+const d = 'M ' + STOPS.map(s => s.x + ' ' + s.y).join(' L ');
+document.getElementById('routeBase').setAttribute('d', d);
+const prog = document.getElementById('routeProg');
+prog.setAttribute('d', d);
+const totalLen = prog.getTotalLength();
+prog.style.strokeDasharray  = totalLen;
+prog.style.strokeDashoffset = totalLen;
+
+STOPS.forEach((s, i) => {
+  const el = document.createElement('div');
+  el.className = 'stop'; el.id = 'stop' + i;
+  el.style.left = (s.x / VW * 100) + '%';
+  el.style.top  = (s.y / VH * 100) + '%';
+  el.innerHTML = `<span class="icon">${s.icon}</span><span class="label">${s.label}</span>`;
+  el.onclick = () => openModal(s);
+  wrap.appendChild(el);
+});
+
+const tr = document.createElement('div');
+tr.className = 'traveler'; tr.id = 'traveler';
+tr.innerHTML = '<div class="bubble"></div><div class="body">🧍</div>';
+wrap.appendChild(tr);
+
+function placeTraveler(x, y) {
+  const r = wrap.getBoundingClientRect();
+  tr.style.left = (x / VW * r.width) + 'px';
+  tr.style.top  = (y / VH * r.height) + 'px';
+}
+placeTraveler(STOPS[0].x, STOPS[0].y - 8);
+STOPS[0].el = () => document.getElementById('stop0');
+document.getElementById('stop0').classList.add('now');
+window.addEventListener('resize', () => placeTraveler(lastX, lastY));
+let lastX = STOPS[0].x, lastY = STOPS[0].y - 8;
+
+/* day cards */
+const daysEl = document.getElementById('days');
+DAY_CARDS.forEach((m, k) => {
+  const c = document.createElement('div');
+  c.className = 'day-card'; c.id = 'card' + k;
+  c.innerHTML = `${m.badge ? `<span class="badge">${m.badge}</span>` : ''}
+    <h3>${m.t}</h3><ul>${m.items.map(i => `<li>${i}</li>`).join('')}</ul>
+    <div class="cost-row">💰 ${m.cost.toLocaleString()}원</div>`;
+  daysEl.appendChild(c);
+});
+
+/* stars */
+const stars = document.getElementById('stars');
+for (let i = 0; i < 60; i++) {
+  const s = document.createElement('div'); s.className = 'star';
+  s.style.left = Math.random() * 100 + '%';
+  s.style.top = Math.random() * 100 + '%';
+  s.style.animationDelay = Math.random() * 2 + 's';
+  stars.appendChild(s);
+}
+
+/* modal */
+const modal = document.getElementById('modal'), modalBox = document.getElementById('modalBox');
+function openModal(s) {
+  modalBox.innerHTML = `<h3>${s.icon} ${s.label}</h3><div>${s.detail}</div>
+    <button class="close" onclick="document.getElementById('modal').classList.remove('open')">닫기</button>`;
+  modal.classList.add('open');
+}
+modal.onclick = e => { if (e.target === modal) modal.classList.remove('open'); };
+
+/* ============ ANIMATION ============ */
+let running = false;
+document.getElementById('startBtn').onclick = function () {
+  if (running) return; running = true;
+  this.textContent = '⏳ 여행 중...';
+  document.querySelectorAll('.stop').forEach(s => s.classList.remove('done', 'now'));
+  prog.style.strokeDashoffset = totalLen;
+  let i = 0;
+  function next() {
+    if (i >= STOPS.length - 1) { finish(); return; }
+    moveLeg(i, () => { i++; setTimeout(next, 700); });
+  }
+  next();
+};
+
+function moveLeg(i, cb) {
+  const from = STOPS[i], to = STOPS[i + 1];
+  tr.classList.add('on-move');
+  tr.querySelector('.bubble').textContent = to.veh === 'plane' ? '✈️ 비행 중...' : '🚗 이동 중...';
+  tr.querySelector('.body').textContent = to.veh === 'plane' ? '🧍‍✈️' : '🚙';
+  const t0 = performance.now(), dur = 1800;
+  const seg = i / (STOPS.length - 1);       // 진행 시작점 비율
+  const segW = 1 / (STOPS.length - 1);      // 구간 폭
+  function step(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    const e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+    const x = from.x + (to.x - from.x) * e;
+    const y = from.y + (to.y - from.y) * e;
+    lastX = x; lastY = y - 8;
+    placeTraveler(x, y - 8);
+    prog.style.strokeDashoffset = totalLen * (1 - (seg + segW * e));
+    if (p < 1) requestAnimationFrame(step);
+    else {
+      tr.querySelector('.body').textContent = '🧍';
+      tr.classList.remove('on-move');
+      const fEl = document.getElementById('stop' + i);
+      fEl.classList.remove('now'); fEl.classList.add('done');
+      const tEl = document.getElementById('stop' + (i + 1));
+      tEl.classList.add('now');
+      cb();
+    }
+  }
+  requestAnimationFrame(step);
+  /* HUD */
+  const idx = i + 1;
+  document.getElementById('hudDay').textContent = `DAY ${to.day} — ${to.label}`;
+  document.getElementById('hudMoney').textContent = '누적 ' + CUM[idx].toLocaleString() + '원';
+  document.getElementById('hudFill').style.width = (idx / (STOPS.length - 1) * 100) + '%';
+  const card = document.getElementById('card' + (to.day - 2));
+  if (card) card.classList.add('active');
+}
+
+function finish() {
+  const btn = document.getElementById('startBtn');
+  btn.textContent = '✅ 여정 완료! 다시 하려면 새로고침';
+  btn.classList.add('done');
+  document.getElementById('hudFill').style.width = '100%';
+  document.getElementById('hudMoney').textContent = '누적 1,569,209원 — 총예산 확정 🎉';
+  confetti();
+}
+function confetti() {
+  const colors = ['#ffd700', '#38b764', '#7df9ff', '#ff9f1c', '#ff5a5f'];
+  for (let i = 0; i < 90; i++) {
+    const c = document.createElement('div'); c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = colors[i % colors.length];
+    c.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    c.style.animationDelay = (Math.random() * 1.5) + 's';
+    document.body.appendChild(c);
+  }
+}
+</script>
+</body>
+</html>
